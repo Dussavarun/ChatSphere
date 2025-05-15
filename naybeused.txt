@@ -1,0 +1,24 @@
+// const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   if (message.trim() !== "" && receiverEmail.trim() !== "") {
+  //     setError(""); // Clear any previous errors
+      
+  //     // Send message to server with sender info
+  //     socket.emit("message", { 
+  //       receiverEmail, 
+  //       message,
+  //       senderEmail: userEmail 
+  //     });
+  //     // Add message to local display
+  //     setDisplayMessages(prev => [...prev, { 
+  //       text: message,
+  //       sender: 'me',
+  //       receiver: receiverEmail 
+  //     }]);
+
+  //     // Clear message input
+  //     setMessage("");
+  //   } else {
+  //     setError("Please enter both a message and receiver email");
+  //   }
+  // };
