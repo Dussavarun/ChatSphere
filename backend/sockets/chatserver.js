@@ -1,6 +1,9 @@
 import {Server} from "socket.io";
 import redisClient from "../redis/redisclient.js";
 import  groupChatModel from "../models/groupchatmodel.js";
+import message from "../models/message.js";
+import groupMessage from "../models/groupMessage.js";
+import User from "../models/User.js";
 
 // server side socket 
 // const users = {};
@@ -106,6 +109,42 @@ export const chatapp = (server) => {
             }
           });
         
+          
+        socket.on('groupmessage' , async({groupName , sender , message}) =>{
+          try{
+            if(groupName){
+              io.to(groupName).emit('group-recieved-message',{
+                  message,
+                  sender
+              })
+            }
+          } catch (error) {
+            console.error("Error sending group message:", error);
+            socket.emit("error", "Server error while sending group message");
+          }
+
+
+          try{
+            const group = await groupChatModel.find({groupchatName : groupName});
+            if (!group) throw new Error("Group not found");
+            const user = await User.findOne({ email: sender });
+            if (!user) throw new Error("Sender not found"); 
+
+            const newgroupmessage = new groupMessage({
+                group : group._id,
+                senderId : user._id,
+                text : message,
+                fileUrl : null,
+                fileName : null,
+            })
+
+            await newgroupmessage.save();
+              console.log("Message saved! heelee");
+          }catch(error){
+              console.error("Error saving message:", err);
+          }
+        })
+
         socket.on("disconnect", async () => {
             
                 // delete users[email];

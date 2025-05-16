@@ -113,11 +113,13 @@ const ChatWindow = ({ conversationId, apiBaseUrl = "http://localhost:3000", onEr
       setIsSending,setMessages,
       onError, apiBaseUrl
     })
+    socket.emit('message', {
+    receiverEmail,
+    message: message.trim(),
+    senderEmail: userEmail
+  });
 
   };
-
-  
-  
 
   return (
     <div className="flex flex-col h-full">

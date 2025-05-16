@@ -109,7 +109,7 @@ const Chatui = () => {
     const handleSocketError = (errorMessage) => {
       setError(errorMessage);
     };
-
+    //in chat server.js
     socket.on("received-message", handleReceivedMessage);
     socket.on("error", handleSocketError);
 
@@ -277,7 +277,7 @@ const Chatui = () => {
             selectedGroup ? (
                 <GroupchatWindow
                    groupchatId = {selectedGroup}
-                   apiBaseUrl={API_BASE_URL}
+                  //  apiBaseUrl={API_BASE_URL}
                    onError={(msg) => setError(msg)}
                 />
             ) : 

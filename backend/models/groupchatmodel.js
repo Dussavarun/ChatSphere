@@ -26,12 +26,12 @@ const groupChatSchema = new mongoose.Schema({
     default: Date.now
     },
     
-    messages: [
-        {
-            sender: String,
-            content: String,
-            timestamp: { type: Date, default: Date.now }
-        }
-    ]
+    // messages: [
+    //     {
+    //         sender: String,
+    //         content: String,
+    //         timestamp: { type: Date, default: Date.now }
+    //     }
+    // ]
 })
 export default mongoose.model("groupChat" , groupChatSchema);

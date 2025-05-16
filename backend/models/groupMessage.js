@@ -6,7 +6,7 @@ const groupMessageSchema = new mongoose.Schema({
     text: { type: String, required: function () { return !this.fileUrl; } },
     fileUrl: { type: String },          
     fileName: { type: String } 
-
+    
 })
 
 
