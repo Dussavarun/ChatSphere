@@ -125,10 +125,16 @@ export const chatapp = (server) => {
 
 
           try{
-            const group = await groupChatModel.find({groupchatName : groupName});
+            const group = await groupChatModel.findOne({groupchatName : groupName});
             if (!group) throw new Error("Group not found");
             const user = await User.findOne({ email: sender });
             if (!user) throw new Error("Sender not found"); 
+
+            console.log({
+              group: group._id,
+              senderId: user._id,
+              text: message
+            });
 
             const newgroupmessage = new groupMessage({
                 group : group._id,
@@ -141,7 +147,7 @@ export const chatapp = (server) => {
             await newgroupmessage.save();
               console.log("Message saved! heelee");
           }catch(error){
-              console.error("Error saving message:", err);
+              console.error("Error saving message:", );
           }
         })
 

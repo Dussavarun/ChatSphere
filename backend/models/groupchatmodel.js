@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const groupChatSchema = new mongoose.Schema({
-    groupchatName : String,
+    groupchatName: { type: String, required: true, unique: true, trim: true },
 
     createdBy: {
         type: String,
@@ -25,13 +25,6 @@ const groupChatSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
     },
-    
-    // messages: [
-    //     {
-    //         sender: String,
-    //         content: String,
-    //         timestamp: { type: Date, default: Date.now }
-    //     }
-    // ]
+
 })
 export default mongoose.model("groupChat" , groupChatSchema);

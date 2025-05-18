@@ -104,7 +104,7 @@ const GroupsDisplay = () => {
                   </ul>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 mt-2">No messages yet</p>
+                <p className="text-sm text-black-500 mt-2">open chat to see messages</p>
               )}
             </div>
           ))}

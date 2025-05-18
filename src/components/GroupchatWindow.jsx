@@ -12,6 +12,7 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [error, setError] = useState("");
+  const messagesEndRef = useRef(null);
 
   const API_BASE_URL = "http://localhost:3000";
   
@@ -31,30 +32,12 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
     getCurrentUser();
   }, []);
 
- 
-  //fetching messages for that room from the backend
-
-  useEffect(()=>{
-       const fetchmessages = async () =>{
-        try{
-          const res = await axios.get(`${API_BASE_URL}/${groupName}/messages`);
-          // setMessages(prev => [...prev , res.data]);
-          setMessages(res.data);
-        }catch(error){
-          console.error("error fetchign group messages")
-        }
-       };
-
-       fetchmessages()
-  },[groupName])
-
+  
   // Fetch group name
   useEffect(() => {
     const fetchGroup = async () => {
       try {
-        console.log(`Fetching group with ID: ${groupchatId}`);
         const res = await axios.get(`${API_BASE_URL}/group/${groupchatId}`);
-        console.log("Group data response:", res.data);
         setGroupName(res.data.name);
       } catch (err) {
         console.error("Error fetching group:", err);
@@ -66,6 +49,40 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
       fetchGroup();
     }
   }, [groupchatId, API_BASE_URL]);
+ 
+  //fetching messages for that room from the backend
+  useEffect(() => {
+    const fetchmessages = async () => {
+      try {        
+        if (!groupchatId) {
+          console.error("Invalid groupchatId:", groupchatId);
+          return;
+        }
+        
+        const res = await axios.get(`${API_BASE_URL}/group/groupmessages/${groupchatId}`);        
+        const formattedMessages = res.data.map(msg => ({
+          ...msg,
+          senderId: msg.senderId || {
+            email: msg.sender || "unknown", 
+            name: msg.senderName || (msg.sender ? msg.sender.split('@')[0] : "Unknown")
+          }
+        }));
+        
+        setMessages(formattedMessages);
+      } catch (error) {
+        console.error("Error fetching group messages:", error.response ? error.response.data : error.message);
+      }
+    };
+    
+    if (groupchatId) {
+      fetchmessages();
+    }
+  }, [groupchatId, API_BASE_URL]);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   // Join group chat room when groupName is available
   useEffect(() => {
@@ -79,20 +96,25 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
   useEffect(() => {
     const handleIncomingMessage = (data) => {
       console.log("Received group message:", data);
-      setMessages(prevMessages => [
-        ...prevMessages,
-        {
-          id: Date.now(),
-          text: data.message,
-          sender: data.sender === userEmail ? "me" : data.sender
-        }
-      ]);
+      // to  ensure the messages send by us is not echoing to ourselves
+      if (data.sender !== userEmail) {
+        setMessages(prevMessages => [
+          ...prevMessages,
+          {
+            id: Date.now(),
+            text: data.message,
+            senderId: {
+              email: data.sender,
+              name: data.senderName || data.sender
+            }
+          }
+        ]);
+      }
     };
 
-    // Listen for group messages
+    // to handle incoming group messages
     socket.on('group-recieved-message', handleIncomingMessage);
     
-    // Cleanup listener when component unmounts
     return () => {
       socket.off("group-recieved-message", handleIncomingMessage);
     };
@@ -104,22 +126,23 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
     
     console.log(`Sending message to group: ${groupName}`);
     
-    // Emit message via socket
     socket.emit("groupmessage", {
       groupName,
       sender: userEmail,
       message: input
     });
     
-    // (optional as the socket will echo it back)
-    // setMessages(prevMessages => [
-    //   ...prevMessages,
-    //   {
-    //     id: Date.now(),
-    //     text: input,
-    //     sender: "me"
-    //   }
-    // ]);
+    setMessages(prevMessages => [
+      ...prevMessages,
+      {
+        id: Date.now(),
+        text: input,
+        senderId: {
+          email: userEmail,
+          name: "Me"
+        }
+      }
+    ]);
     
     setInput("");
   };
@@ -129,6 +152,11 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
     if (e.key === "Enter") {
       sendMessage();
     }
+  };
+
+  // to check if the message is from current user to hanle proper ui
+  const isCurrentUserMessage = (message) => {
+    return message.senderId?.email === userEmail;
   };
 
   return (
@@ -145,20 +173,26 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
         {messages.length === 0 ? (
           <div className="text-center text-gray-500">No messages yet</div>
         ) : (
-          messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`max-w-xs px-4 py-2 rounded-lg ${
-                msg.sender === "me" ? "bg-blue-500 text-white ml-auto" : "bg-gray-200 text-black"
-              }`}
-            >
-              {msg.sender !== "me" && (
-                <div className="text-xs font-semibold mb-1">{msg.sender}</div>
-              )}
-              {msg.text}
-            </div>
-          ))
+          messages.map((msg, index) => {
+            const isMe = isCurrentUserMessage(msg);
+            return (
+              <div
+                key={index}
+                className={`max-w-xs px-4 py-2 rounded-lg ${
+                  isMe ? "bg-blue-500 text-white ml-auto" : "bg-gray-200 text-black"
+                }`}
+              >
+                {!isMe && (
+                  <div className="text-xs font-semibold mb-1">
+                    {msg.senderId?.name || (msg.senderId?.email ? msg.senderId.email : 'Unknown')}
+                  </div>
+                )}
+                {msg.text}
+              </div>
+            );
+          })
         )}
+        <div ref={messagesEndRef} /> {/* Invisible element to scroll to */}
       </div>
 
       {/* Input */}
@@ -184,4 +218,4 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
   );
 };
 
-export default GroupchatWindow
+export default GroupchatWindow;

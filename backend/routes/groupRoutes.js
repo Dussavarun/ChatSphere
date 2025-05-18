@@ -8,6 +8,7 @@ const router = express.Router();
 router.post('/createGroup' , createGroupController)
 router.post('/groupsList' , fetchGroupList)
 router.get('/:id',groupchatname)
-router.get('/:groupName/messages' , fetchgroupmessages);
+//remember always set ensure the names match in the api endpoints while fetching any data
+router.get('/groupmessages/:groupchatId' , fetchgroupmessages);
 
 export default router;
