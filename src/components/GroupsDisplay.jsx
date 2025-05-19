@@ -84,8 +84,13 @@ const GroupsDisplay = () => {
               
               <div className="mt-2">
                 <p className="text-sm text-gray-600">
-                  Members: {gpchat.members.map(member => member.email).join(', ')}
+                  Members: {gpchat.members
+                    .slice(0, 4)
+                    .map(member => member.email)
+                    .join(', ')}
+                  {gpchat.members.length > 4 && '...'}
                 </p>
+
                 <p className="text-xs text-gray-500">
                   Admin: {gpchat.members.find(member => member.role === "admin")?.email || gpchat.createdBy}
                 </p>
