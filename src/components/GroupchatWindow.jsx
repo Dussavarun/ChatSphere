@@ -105,11 +105,14 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
           ...prevMessages,
           {
             id: Date.now(),
-            text: data.message,
+            text: data.message || "",
             senderId: {
               email: data.sender,
               name: data.senderName || data.sender
-            }
+            },
+            fileUrl: data.fileUrl || null, 
+            fileName: data.fileName || null,
+            // createdAt : new Date().toISOString()
           }
         ]);
       }
@@ -125,14 +128,15 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
 
   // Send message function
   const sendMessage = () => {
-    if (!input.trim() || !groupName) return;
     if(file){
-      groupfilesharing({file , groupName ,input, userEmail , setFile , setMessages , API_BASE_URL} );
+      groupfilesharing({file , groupName ,input : input.trim() || "", userEmail , setFile , setMessages , API_BASE_URL} );
+      setInput("");
     }else{
       socket.emit("groupmessage", {
         groupName,
         sender: userEmail,
-        message: input
+        message: input,
+        // createdAt : new Date().toISOString()
       });
       
       setMessages(prevMessages => [
@@ -143,7 +147,8 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
           senderId: {
             email: userEmail,
             name: "Me"
-          }
+          },
+          // createdAt : new Date().toISOString()
         }
       ]);
       setInput("");
@@ -233,7 +238,7 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
         <button
           onClick={sendMessage}
           className="bg-blue-500 text-white px-4 py-2 rounded"
-          disabled={!groupName || !input.trim()}
+           disabled={!groupName || (!input.trim() && !file)}
         >
           Send
         </button>

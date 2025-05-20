@@ -36,8 +36,9 @@ const Messagecontent = ({msg}) => {
         
         {/* Message timestamp */}
         <div className="text-xs mt-1 opacity-75">
-          {msg.pending ? 'Sending...' : new Date(msg.createdAt).toLocaleTimeString()}
+          {msg.pending ? 'Sending...' : (msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : '')}
         </div>
+
     </>
   )
 }

@@ -8,7 +8,7 @@ export const groupfilesharing = async({
       
       const messagetext = input.trim();
       const formData = new FormData();
-      formData.append("senderEmail", userEmail);
+      formData.append("userEmail", userEmail);
       formData.append("groupName" , groupName);
       formData.append("text", messagetext);
 
@@ -17,6 +17,7 @@ export const groupfilesharing = async({
       }
 
       const response = await axios.post(`${apiBaseUrl}/group/fileupload` , formData);
+
       const { data } = response;
       const fileUrl = data?.data?.fileUrl || null;
       const fileName = data?.data?.fileName || null;
@@ -31,6 +32,7 @@ export const groupfilesharing = async({
           },
          fileUrl ,
          fileName ,
+        //  createdAt : new  Date().toISOString()
         }
       ]);
       setFile(null);

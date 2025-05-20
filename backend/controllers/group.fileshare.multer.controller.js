@@ -54,6 +54,7 @@ export const groupfilesharecontroller = [
         text: text || null,
         fileUrl,
         fileName,
+        // createdAt : new new Date().toISOString()
       });
 
       await newgroupmessage.save();
@@ -64,9 +65,16 @@ export const groupfilesharecontroller = [
         fileUrl,
         fileName,
         userEmail,
+        // createdAt : new new Date().toISOString()
       });
 
-      res.status(200).json({ message: "File uploaded successfully" });
+      res.status(200).json({ 
+                message: "File uploaded successfully",
+                data: {
+                    fileUrl,
+                    fileName
+                }
+            });
     } catch (error) {
       console.error("Error sending message:", error);
       res.status(500).json({ error: "Internal Server Error" });
