@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import socket from "../../backend/sockets/socket";
+import axios from "axios";
 import { fetchCurrentUser } from "../../backend/controllers/Fetchcurrentuser";
 import { fetchConversationDetails } from "../../backend/controllers/fetchConversationDetails";
 import { fetchMessages } from "../../backend/controllers/fetchmessages";
@@ -121,6 +122,17 @@ const ChatWindow = ({ conversationId, apiBaseUrl = "http://localhost:3000", onEr
 
   };
 
+  const handledeletemessage = async(id) =>{
+      try {
+          await axios.delete(`http://localhost:3000/message/message-delete/${id}`);
+          console.log('Deleted message id:', id);
+          setMessages(prev => prev.filter(m => m.id !== id));
+          console.log("message deleting bro wait");
+      } catch (err) {
+        console.error("Failed to delete message:", err);
+      }
+  }
+
   return (
     <div className="flex flex-col h-full">
       {/* Chat header */}
@@ -176,7 +188,7 @@ const ChatWindow = ({ conversationId, apiBaseUrl = "http://localhost:3000", onEr
                     : 'bg-gray-200 text-gray-800'
                 }`}
               >
-                <Messagecontent msg={msg}></Messagecontent>
+                <Messagecontent key={msg.id} msg={msg} onDelete={()=>handledeletemessage(msg.id)}></Messagecontent>
               </div>
             </div>
           ))

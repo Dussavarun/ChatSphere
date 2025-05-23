@@ -156,6 +156,16 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
         
   };
 
+   const handlemessagedelete = async(id) =>{
+         try {
+             await axios.delete(`http://localhost:3000/message/message-delete/${id}`);
+             console.log('Deleted message id:', id);
+             setMessages(prev => prev.filter(m => m._id !== id));
+             console.log("message deleting bro wait");
+         } catch (err) {
+           console.error("Failed to delete message:", err);
+         }
+  }
   // Handle Enter key press
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
@@ -190,7 +200,7 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
               const isMe = isCurrentUserMessage(msg);
               return (
                 <div
-                  key={index}
+                  key={msg._id}
                   className={`max-w-xs px-4 py-2 rounded-lg ${
                     isMe ? "bg-blue-500 text-white ml-auto" : "bg-gray-200 text-black"
                   }`}
@@ -201,7 +211,7 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
                     </div>
                   )}
 
-                  <Messagecontent msg={msg} />
+                  <Messagecontent key={msg._id} msg={msg} onDelete={()=>handlemessagedelete(msg._id)}/>
                 </div>
               );
             })

@@ -5,6 +5,7 @@ import Conversation from "../models/conversation.room.js";
 import User from "../models/User.js";
 import { getIo } from "../sockets/chatserver.js";
 import multer from "multer";
+import { messagedelete } from "../controllers/message.delete.js";
 const router = express.Router();
 
 
@@ -131,6 +132,10 @@ router.get("/:conversationId", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+
+router.delete('/message-delete/:id',messagedelete);
+
 
 // Get a single conversation by ID // used in chat window
 router.get("/conversation/:conversationId", async (req, res) => {
