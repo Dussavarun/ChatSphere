@@ -1,13 +1,9 @@
 import {Server} from "socket.io";
 import redisClient from "../redis/redisclient.js";
-import  groupChatModel from "../models/groupchatmodel.js";
+import groupChatModel from "../models/groupchatmodel.js";
 import message from "../models/message.js";
 import groupMessage from "../models/groupMessage.js";
 import User from "../models/User.js";
-
-// server side socket 
-// const users = {};
-// const userEmails = {}; // To track email by socket ID // here instead we can use redis for handling online users instead of these objects
 
 let io;
 
@@ -19,168 +15,200 @@ export const chatapp = (server) => {
             credentials: true
         }
     });
-                        //this socket is automatically created when a client connects in the frontend
+
     io.on("connection", async (socket) => {
-        console.log(`A user is connected with id (in chatserver.js) ${socket.id}`);
+        console.log(`A user is connected with id: ${socket.id}`);
         
         socket.on("user-login", async(email) => {
-      
-            // users[email] = socket.id;
-            // userEmails[socket.id] = email; // Store email by socket ID
-
             await redisClient.set(`user:${email}`, socket.id);
             await redisClient.set(`socket:${socket.id}`, email);
-
-            // const users = await getAllLoggedInUsers();
-            // console.log("Current logged-in users:", users);
-            // console.log(`User logged in with email: ${email}`);
-            // console.log(`Current users: ${JSON.stringify(users, null, 2)}`);
             
-
-
-            // Join a room with the user's email for direct messaging // so here you joins your own room with your name i.e your email so 
-            // when other wants to send a message they join to your room and starts messaging
+            // Join user's personal room for direct messaging
             socket.join(email);
-
-
-            socket.broadcast.emit("user-status-change",{
-                email : email,
-                status : true,
-            })
-
+            
+            socket.broadcast.emit("user-status-change", {
+                email: email,
+                status: true,
+            });
         });
 
-
-        socket.on("join-groups", async(email)=>{
-            const groups = await groupChatModel.find({'members.email' : email} , 'groupchatName')
-            const groupNames = groups.map(group => group.groupchatName);
-            socket.join(groupNames);
-            console.log(`User with email : ${email} joined group rooms:`, groupNames);
-            groupNames.forEach(groupName => {
-              const room = io.sockets.adapter.rooms.get(groupName);
-              const count = room ? room.size : 0;
-              console.log(`Users in room ${groupName}: ${count}`);
-            });
-        })
-
-        socket.on("check-online-status", async(email,callback)=>{
-                try{
-                    const socketId = await redisClient.get(`user:${email}`);
-                    if(socketId){
-                        callback({
-                           online : !!socketId,
-                           lastSeen : Date.now()
-                       })
-                    }else{
-                        lastSeen = await redisClient.get(`lastseen:${email}`);
-                        callback({ 
-                            online: false, 
-                            lastSeen : lastSeen ? Number(lastSeen) : null
-                        });
+       // this is done once the component mounts 
+        socket.on("join-groups", async(email) => {
+            try { 
+               // to remove any stale or inactive or removed rooms the user is in 
+                const currentRooms = Array.from(socket.rooms);
+                for (const room of currentRooms) {
+                    if (room !== socket.id && room !== email) {
+                        socket.leave(room);
                     }
-                }catch(error){
-                    callback({
-                        online : false,
-                        lastSeen : Date.now()
-                    })
                 }
-        })
+
+                // joining the user in all the groups he is in
+                const groups = await groupChatModel.find(
+                    {'members.email': email}, 
+                    'groupchatName _id'
+                );
+                
+                for (const group of groups) {
+                    const roomName = `group_${group._id}`; // Using groupID instead of name for uniqueness
+                    socket.join(roomName);
+                    console.log(`User ${email} joined group room: ${roomName}`);
+                }
+                
+                // redis storage for fater acess and verification
+                const groupIds = groups.map(g => g._id.toString());
+                await redisClient.set(`user_groups:${email}`, JSON.stringify(groupIds));
+                
+            } catch (error) {
+                console.error("Error joining groups:", error);
+                socket.emit("error", "Failed to join groups");
+            }
+        });
+        
+        // join specific group room (when user selects a group) // basically for real time chatting 
+        socket.on('join-specific-group', async({groupId, userEmail}) => {
+            try {
+                // Verify user is member of this group
+                const group = await groupChatModel.findById(groupId);
+                if (!group) {
+                    socket.emit("error", "Group not found");
+                    return;
+                }
+
+                const isMember = group.members.some(member => member.email === userEmail);
+                if (!isMember) {
+                    socket.emit("error", "Access denied");
+                    return;
+                }
+
+                const roomName = `group_${groupId}`;
+                socket.join(roomName);                
+            } catch (error) {
+                console.error("Error joining specific group:", error);
+                socket.emit("error", "Failed to join group");
+            }
+        });
+
+        socket.on('groupmessage', async({groupName, sender, message}) => {
+            try {
+                
+                const senderEmail = await redisClient.get(`socket:${socket.id}`);
+                if (senderEmail !== sender) {
+                    socket.emit("error", "Authentication mismatch");
+                    return;
+                }
+
+                // just to check the user and group are present and user belongs to this group
+                const group = await groupChatModel.findOne({groupchatName: groupName});
+                if (!group) {
+                    socket.emit("error", "Group not found");
+                    return;
+                }
+
+                const isMember = group.members.some(member => member.email === sender);
+                if (!isMember) {
+                    socket.emit("error", "You are not a member of this group");
+                    return;
+                }
+
+                // Use group ID for room name to ensure uniqueness (in case if they have same group names)
+                const roomName = `group_${group._id}`;
+                
+                io.to(roomName).emit('group-recieved-message', {
+                    message,
+                    sender,
+                    groupName,
+                    groupId: group._id,
+                    timestamp: new Date().toISOString()
+                });
+
+                console.log(`Message sent to group ${groupName} (${roomName}) by ${sender}`);
+
+                // saving message to database
+                const user = await User.findOne({ email: sender });
+                if (user) {
+                    const newGroupMessage = new groupMessage({
+                        group: group._id,
+                        senderId: user._id,
+                        text: message,
+                        fileUrl: null,
+                        fileName: null,
+                    });
+                    await newGroupMessage.save();
+                }
+
+            } catch (error) {
+                console.error("Error sending group message:", error);
+                socket.emit("error", "Server error while sending group message");
+            }
+        });
+
+        socket.on("disconnect", async () => {
+            try {
+                const email = await redisClient.get(`socket:${socket.id}`);
+                if (email) {
+                    await redisClient.del(`user:${email}`);
+                    await redisClient.del(`socket:${socket.id}`);
+                    await redisClient.del(`user_groups:${email}`);
+                    
+                    socket.broadcast.emit("user-status-change", {
+                        email,
+                        status: false,
+                        lastSeen: Date.now()
+                    });
+                    
+                    console.log(`User disconnected: ${email}`);
+                }
+            } catch (err) {
+                console.error("Error in disconnect handler:", err);
+            }
+        });
+
+        // Other existing socket events...
+        socket.on("check-online-status", async(email, callback) => {
+            try {
+                const socketId = await redisClient.get(`user:${email}`);
+                if (socketId) {
+                    callback({
+                        online: !!socketId,
+                        lastSeen: Date.now()
+                    });
+                } else {
+                    const lastSeen = await redisClient.get(`lastseen:${email}`);
+                    callback({ 
+                        online: false, 
+                        lastSeen: lastSeen ? Number(lastSeen) : null
+                    });
+                }
+            } catch (error) {
+                callback({
+                    online: false,
+                    lastSeen: Date.now()
+                });
+            }
+        });
 
         socket.on("message", async ({ receiverEmail, message, senderEmail }) => {
             try {
-            
-              if (!senderEmail) {
-                senderEmail = await redisClient.get(`socket:${socket.id}`);
-              }
-              //since when the user logins socket.join(email) so we can directly message using email rather than using the socket id
-              if (receiverEmail) {
-                io.to(receiverEmail).emit("received-message", {
-                  message,
-                  senderEmail: senderEmail || "Unknown Sender"
-                });
-                console.log(`Message sent from ${senderEmail} to ${receiverEmail}`);
-              } else {
-                console.log(`User ${receiverEmail} is offline or not found`);
-                socket.emit("error", "User is offline or not found");
-              }
-            } catch (error) {
-              console.error("Error sending message:", error);
-              socket.emit("error", "Server error while sending message");
-            }
-          });
-        
-          
-        socket.on('groupmessage' , async({groupName , sender , message}) =>{
-          try{
-            if(groupName){
-              io.to(groupName).emit('group-recieved-message',{
-                  message,
-                  sender
-              })
-            }
-          } catch (error) {
-            console.error("Error sending group message:", error);
-            socket.emit("error", "Server error while sending group message");
-          }
-
-
-          try{
-            const group = await groupChatModel.findOne({groupchatName : groupName});
-            if (!group) throw new Error("Group not found");
-            const user = await User.findOne({ email: sender });
-            if (!user) throw new Error("Sender not found"); 
-
-            console.log({
-              group: group._id,
-              senderId: user._id,
-              text: message
-            });
-
-            const newgroupmessage = new groupMessage({
-                group : group._id,
-                senderId : user._id,
-                text : message,
-                fileUrl : null,
-                fileName : null,
-            })
-
-            await newgroupmessage.save();
-              console.log("Message saved! heelee");
-          }catch(error){
-              console.error("Error saving message:", );
-          }
-        })
-
-        socket.on("disconnect", async () => {
-            
-                // delete users[email];
-                // delete userEmails[socket.id];
-                // console.log(`User disconnected: ${email}`);
-                // console.log(`Current users: ${JSON.stringify(users, null, 2)}`);
-            
-              try {
-                const email = await redisClient.get(`socket:${socket.id}`);
-                if (email) {
-                  await redisClient.del(`user:${email}`);
-                  await redisClient.del(`socket:${socket.id}`);
-                  console.log(` Disconnected: ${email}`);
+                if (!senderEmail) {
+                    senderEmail = await redisClient.get(`socket:${socket.id}`);
                 }
-                socket.broadcast.emit("user-status-change", {
-                  email,
-                  status: false,
-                  lastSeen: Date.now()
-                });
-              } catch (err) {
-                console.error(" Error in disconnect handler:", err);
-              }
-        });
-
-        socket.on("ping", () => {
-            socket.emit("pong");
+                
+                if (receiverEmail) {
+                    io.to(receiverEmail).emit("received-message", {
+                        message,
+                        senderEmail: senderEmail || "Unknown Sender"
+                    });
+                    console.log(`Message sent from ${senderEmail} to ${receiverEmail}`);
+                } else {
+                    socket.emit("error", "User is offline or not found");
+                }
+            } catch (error) {
+                console.error("Error sending message:", error);
+                socket.emit("error", "Server error while sending message");
+            }
         });
     });
 };
 
 export const getIo = () => io;
-
-export default {chatapp, getIo};

@@ -208,7 +208,7 @@ const Chatui = () => {
               </button>
             </div>
             
-            <div className="overflow-y-auto" style={{ height: "calc(80vh - 57px)" }}>
+            <div className="overflow-y-auto" style={{ height: "calc(80vh - 57px)" , scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {isLoading && conversations.length === 0 ? (
                 <p className="p-4 text-gray-500 text-center">Loading conversations...</p>
               ) : (
@@ -240,7 +240,7 @@ const Chatui = () => {
                 })
               )}
               {/* Groups section */}
-               <div className="h-full overflow-y-auto p-4 bg-white rounded-md shadow-md">
+               <div className="h-full overflow-y-auto p-4 bg-white rounded-md shadow-md" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="font-semibold text-gray-500 uppercase text-xs tracking-wider">Groups</h2>
                     <button 

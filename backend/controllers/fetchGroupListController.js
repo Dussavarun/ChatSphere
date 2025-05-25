@@ -11,12 +11,10 @@ export const fetchGroupList = async (req, res) => {
     }
 
     console.log("Searching for groups with user:", userEmail);
-    
-    // First check if any groups exist at all (debugging)
+  
     const allGroups = await groupChatModel.find({});
     console.log("All groups in database:", allGroups.length);
     
-    // Now search for the user's groups
     const groups = await groupChatModel.find({ 
       "members.email": userEmail 
     });
