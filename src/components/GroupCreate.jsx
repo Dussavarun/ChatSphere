@@ -61,7 +61,7 @@ const GroupCreate = ({onClose} ) => {
   };
         return (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-xl shadow-xl relative w-full max-w-md">
+            <div className="bg-black p-6 rounded-xl shadow-xl relative w-full max-w-md">
             <button
                 className="absolute top-4 right-4 text-red-500 hover:text-red-700"
                 onClick={onClose}
