@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import React from "react";
-import { fetchCurrentUser } from "../../backend/controllers/Fetchcurrentuser";
+import { fetchCurrentUser } from "../../backend/controllers/FetchCurrentuser";
 import socket from "../../backend/sockets/socket";
 import { groupfilesharing } from "../../backend/utils/group.filesharing.multer";
 import Messagecontent from "./Messagecontent";

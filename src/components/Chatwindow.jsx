@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import socket from "../../backend/sockets/socket";
 import axios from "axios";
-import { fetchCurrentUser } from "../../backend/controllers/Fetchcurrentuser";
-import { fetchConversationDetails } from "../../backend/controllers/fetchConversationDetails";
-import { fetchMessages } from "../../backend/controllers/fetchmessages";
-import sendMessage from "../../backend/controllers/sending.message";
+import { fetchCurrentUser } from "../../backend/controllers/FetchCurrentuser";
+import { fetchConversationDetails } from "../../backend/controllers/FetchConversationDetails";
+import { fetchMessages } from "../../backend/controllers/Fetchmessages";
+import sendMessage from "../../backend/controllers/Sending.message";
 import { handleNewMessage } from "../../backend/sockets/socket.handlenewmessage";
 import Messagecontent from "./Messagecontent";
 import { Send, Paperclip, X } from "lucide-react";

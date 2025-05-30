@@ -5,7 +5,7 @@ import Conversation from "../models/conversation.room.js";
 import User from "../models/User.js";
 import { getIo } from "../sockets/chatserver.js";
 import multer from "multer";
-import { messagedelete } from "../controllers/message.delete.js";
+import { messagedelete } from "../controllers/Message.delete.js";
 const router = express.Router();
 
 

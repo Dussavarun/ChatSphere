@@ -6,7 +6,7 @@ import ChatWindow from "./Chatwindow";
 import { Plus, MessageCircle, Users, LogOut, Send } from "lucide-react";
 import GroupsDisplay from "./GroupsDisplay";
 import GroupCreate from "./GroupCreate";
-import { fetchConversations } from "../../backend/controllers/fetchfreindslist";
+import { fetchConversations } from "../../backend/controllers/Fetchfreindslist";
 import GroupchatWindow from "./GroupchatWindow";
 
 const Chatui = () => {

@@ -1,9 +1,9 @@
 import express from "express";
 import { createGroupController } from "../controllers/creating.Group.controller.js";
-import { fetchGroupList } from "../controllers/fetchGroupListController.js";
-import { groupchatname } from "../controllers/getgroupname.js";
-import { fetchgroupmessages } from "../controllers/fetching.groupmessages.js";
-import { groupfilesharecontroller } from "../controllers/group.fileshare.multer.controller.js";
+import { fetchGroupList } from "../controllers/FetchGroupListController.js";
+import { groupchatname } from "../controllers/Getgroupname.js";
+import { fetchgroupmessages } from "../controllers/Fetching.groupmessages.js";
+import { groupfilesharecontroller } from "../controllers/Group.fileshare.multer.controller.js";
 const router = express.Router();
 
 router.post('/createGroup' , createGroupController)
