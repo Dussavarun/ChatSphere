@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { fetchCurrentUser } from '../../backend/controllers/FetchCurrentuser';
+import { fetchCurrentUser } from '../utils/FetchCurrentuser';
 import { usechatTypeStore } from '../store/chatTypeStore';
 import socket from '../../backend/sockets/socket';
 
