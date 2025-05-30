@@ -1,6 +1,6 @@
 import express from "express";
 import { createGroupController } from "../controllers/creating.Group.controller.js";
-import { fetchGroupList } from "../controllers/FetchGroupListController.js";
+import {fetchGroupList} from "../controllers/FetchGroupListController.js"
 import { groupchatname } from "../controllers/Getgroupname.js";
 import { fetchgroupmessages } from "../controllers/Fetching.groupmessages.js";
 import { groupfilesharecontroller } from "../controllers/Group.fileshare.multer.controller.js";
