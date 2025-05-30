@@ -1,3 +1,5 @@
+
+
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import React from "react";
@@ -128,7 +130,7 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
     // to handle errors
     const handleSocketError = (errorMessage) => {
       console.error("Socket error:", errorMessage);
-      setError(errorMessage);
+      setError(errorMessage , `please refresh the page and start you conversation`);
     };
 
     socket.on('group-recieved-message', handleIncomingMessage);

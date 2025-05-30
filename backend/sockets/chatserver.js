@@ -4,6 +4,7 @@ import groupChatModel from "../models/groupchatmodel.js";
 import message from "../models/message.js";
 import groupMessage from "../models/groupMessage.js";
 import User from "../models/User.js";
+import groupchatmodel from "../models/groupchatmodel.js";
 
 let io;
 
@@ -122,6 +123,7 @@ export const chatapp = (server) => {
                     timestamp: new Date().toISOString()
                 });
 
+
                 console.log(`Message sent to group ${groupName} (${roomName}) by ${sender}`);
 
                 // saving message to database
@@ -134,8 +136,17 @@ export const chatapp = (server) => {
                         fileUrl: null,
                         fileName: null,
                     });
-                    await newGroupMessage.save();
+                    const savedgroupmessage = await newGroupMessage.save();
+
+                    await groupchatmodel.findByIdAndUpdate(group._id ,{
+                         lastgroupMessage : savedgroupmessage._id
+                    });
                 }
+
+                io.to(roomName).emit('group-list-update', {
+                    groupId: group._id,
+                    groupName: groupName
+                });
 
             } catch (error) {
                 console.error("Error sending group message:", error);
@@ -199,10 +210,13 @@ export const chatapp = (server) => {
                         message,
                         senderEmail: senderEmail || "Unknown Sender"
                     });
+                    io.to(receiverEmail).emit("convo-list-update");
                     console.log(`Message sent from ${senderEmail} to ${receiverEmail}`);
                 } else {
                     socket.emit("error", "User is offline or not found");
                 }
+
+
             } catch (error) {
                 console.error("Error sending message:", error);
                 socket.emit("error", "Server error while sending message");

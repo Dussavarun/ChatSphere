@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { fetchCurrentUser } from '../../backend/controllers/Fetchcurrentuser';
 import { usechatTypeStore } from '../store/chatTypeStore';
+import socket from '../../backend/sockets/socket';
 
 const GroupsDisplay = () => {
   const API_BASE_URL = "http://localhost:3000";
@@ -26,11 +27,11 @@ const GroupsDisplay = () => {
         
     getCurrentUser();
   }, []);
-
+  
   // Fetch group chats when userEmail is available
   useEffect(() => {
     if (userEmail) {
-      fetchGroupChats();
+      fetchGroupChats(); // initial load
     }
   }, [userEmail]);
 
@@ -51,10 +52,29 @@ const GroupsDisplay = () => {
       setIsLoading(false);
     }
   };
+  // Socket event listeners for real-time updates
+  useEffect(() => {
+    if (userEmail) {
+      // Add event listeners
+      const handler = () =>{
+        fetchGroupChats();
+      }
+      socket.on("groupmessage", handler);
+      socket.on("group-recieved-message",handler);
+      socket.on("group-list-update", handler);
+
+      return () => {
+        // cleaning  up the event listeners
+        socket.off("groupmessage", handler);
+        socket.off("group-recieved-message", handler);
+        socket.off("group-list-update", handler);
+      };
+    }
+  }, [userEmail]);
+
 
   const handleGroupClick = (groupId) => {
     setSelectedGroup(groupId);
-    // You might want to add additional logic here
     console.log("Selected group:", groupId);
   };
 
@@ -96,20 +116,24 @@ const GroupsDisplay = () => {
                 </p>
               </div>
               
-              {gpchat.messages && gpchat.messages.length > 0 ? (
+              {/* Display last message if available */}
+              {gpchat.lastgroupMessage ? (
                 <div className="mt-3">
-                  <p className="text-sm font-medium">Latest Messages:</p>
-                  <ul className="mt-1 space-y-1">
-                    {gpchat.messages.slice(0, 3).map((msg, idx) => (
-                      <li key={idx} className="text-sm">
-                        <span className="font-medium">{msg.sender}: </span>
-                        {msg.content}
-                      </li>
-                    ))}
-                  </ul>
+                  <p className="text-sm font-medium">Latest Message:</p>
+                  <div className="mt-1">
+                    <span className="text-sm font-medium">
+                      {gpchat.lastgroupMessage.senderId?.email || 'Unknown'}: 
+                    </span>
+                    <span className="text-sm ml-1">
+                      {gpchat.lastgroupMessage.text}
+                    </span>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {new Date(gpchat.lastgroupMessage.createdAt).toLocaleString()}
+                    </p>
+                  </div>
                 </div>
               ) : (
-                <p className="text-sm text-black-500 mt-2">open chat to see messages</p>
+                <p className="text-sm text-gray-500 mt-2">No messages yet</p>
               )}
             </div>
           ))}

@@ -75,6 +75,7 @@ router.post("/send", upload.single("file") ,async (req, res) => {
     
     // Update conversation's lastMessage
     conversation.lastMessage = newMessage._id;
+    conversation.updatedAt = new Date();
     await conversation.save();
     
     // Send via socket.io

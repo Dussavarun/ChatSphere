@@ -58,8 +58,8 @@ router.post('/register', async (req, res) => {
             password: hashedPassword,
             mobilenumber
         });
-        
-        let token = jwt.sign({ email }, "secretKey", { expiresIn: "1h" });
+        // { expiresIn: "1h" }
+        let token = jwt.sign({ email }, "secretKey");
         
         res.cookie("token", token, {
             httpOnly: true,

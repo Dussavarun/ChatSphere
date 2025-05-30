@@ -80,6 +80,22 @@ const Chatui = () => {
     }
   }, [userEmail, API_BASE_URL]);
 
+ useEffect(() => {
+  if (userEmail) {
+    const handler = () => {
+      fetchConversations(userEmail, setIsLoading, setConversations, setError);
+    };
+
+    socket.on("message", handler);
+    socket.on("convo-list-update", handler);
+
+    return () => {
+      socket.off("message", handler);
+      socket.off("convo-list-update", handler);
+    };
+  }
+}, [userEmail]);
+
   useEffect(() => {
     const handleReceivedMessage = (data) => {
       if (userEmail) {
@@ -227,7 +243,7 @@ const Chatui = () => {
                           onClick={() => setSelectedChat(chat._id)}
                         >
                           <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-r from-gray-600 to-gray-700 rounded-full flex items-center justify-center">
+                            <div className="w-10 h-10 bg-gradient-to-r from-black-600 to-gray-700 rounded-full flex items-center justify-center">
                               <span className="text-white font-medium text-sm">
                                 {otherUser?.email?.charAt(0).toUpperCase() || "?"}
                               </span>

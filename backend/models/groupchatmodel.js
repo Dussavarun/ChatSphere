@@ -19,7 +19,9 @@ const groupChatSchema = new mongoose.Schema({
         enum: ["admin", "member"],
         default: "member"
     },
-  }],
+   }],
+
+    lastgroupMessage: { type: mongoose.Schema.Types.ObjectId, ref: "groupMessage" },
 
     createdAt: {
     type: Date,
