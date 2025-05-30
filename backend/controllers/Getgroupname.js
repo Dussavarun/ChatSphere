@@ -6,5 +6,4 @@ const groupname = async (req , res)=>{
         res.json({name : group.groupchatName});
 };
 
-
 export default groupname;
