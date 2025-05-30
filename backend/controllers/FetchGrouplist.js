@@ -1,6 +1,6 @@
 import groupChatModel from "../models/groupchatmodel.js";
 
-export const fetchGroupList = async (req, res) => {
+export const fetchgrouplist = async (req, res) => {
   try {
     const { userEmail } = req.body;
 
