@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { X } from "lucide-react";
 import { fetchCurrentUser } from '../../backend/controllers/FetchCurrentuser.js';
 import axios from 'axios';
-import { fetchConversations } from '../../backend/controllers/Fetchfreindslist.js';
+import { fetchConversations } from '../utils/Fetchfreindslist.js';
 // import { fetchConversations } from '../../backend/controllers/fetchfreindslist';
 
 const GroupCreate = ({onClose} ) => {
