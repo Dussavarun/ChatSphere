@@ -17,8 +17,8 @@ const Chatui = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [createGroupshow, setcreateGroupshow] = useState(false);
   
-  const API_BASE_URL = "http://localhost:3000";
-
+  // const API_BASE_URL = "http://localhost:3000";
+ const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const selectedChat = usechatTypeStore(state => state.selectedChat);
   const selectedGroup = usechatTypeStore(state => state.selectedGroup);
   const setSelectedChat = usechatTypeStore(state => state.setSelectedChat);

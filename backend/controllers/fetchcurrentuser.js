@@ -1,12 +1,12 @@
 import axios from "axios";
 
-const apiBaseUrl = "http://localhost:3000";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const fetchCurrentUser = async (setIsLoading, setUserEmail, onError) => {
     try {
         setIsLoading(true);
         const token = localStorage.getItem("token");
-        const response = await axios.get(`${apiBaseUrl}/current-user`, {
+        const response = await axios.get(`${API_BASE_URL}/current-user`, {
             withCredentials: true,
             headers: {
                 "Authorization": token ? `Bearer ${token}` : undefined

@@ -7,7 +7,8 @@ import { fetchConversations } from '../../backend/controllers/Fetchfreindslist.j
 
 const GroupCreate = ({onClose} ) => {
 
-  const API_BASE_URL = "http://localhost:3000";
+  // const API_BASE_URL = "http://localhost:3000";
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
   
   const [groupName, setGroupName] = useState("");
   const [userEmail , setuserEmail] = useState("");

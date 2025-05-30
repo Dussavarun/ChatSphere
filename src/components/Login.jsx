@@ -9,6 +9,8 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
   const handleformchange = (e) => {
     const {name, value} = e.target;
     setlogformdata((prevdata) => ({ ...prevdata, [name]: value }));
@@ -19,7 +21,7 @@ const Login = () => {
     setError('');
     setIsLoading(true);
     
-    axios.post("http://localhost:3000/login", logformdata, {
+    axios.post(`${API_BASE_URL}/login`, logformdata, {
       headers: { "Content-Type": "application/json" }, withCredentials: true
     })
     .then((response) => {

@@ -5,11 +5,11 @@ import { useParams } from "react-router-dom";
 const ResetPassword = () => {
   const { token } = useParams(); 
   const [password, setPassword] = useState("");
-
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/emailService/reset-password", {
+      const res = await axios.post(`${API_BASE_URL}/emailService/reset-password`, {
         token,
         password,
       });

@@ -9,7 +9,7 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const handleformdataChange = (e) => {
     const { name, value } = e.target;
     setFormdata((prevdata) => ({ ...prevdata, [name]: value }));
@@ -26,7 +26,7 @@ const Register = () => {
     const dataToSend = { ...formdata };
     delete dataToSend.confirmPassword;
     
-    axios.post("http://localhost:3000/register", dataToSend, {
+    axios.post(`${API_BASE_URL}/register`, dataToSend, {
       headers: { "Content-Type": "application/json" }, withCredentials: true
     })
     .then(() => navigate('/chat'))

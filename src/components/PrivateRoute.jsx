@@ -4,9 +4,9 @@ import { Navigate } from "react-router-dom";
 
 const PrivateRoute = ({ element }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(null);
-    
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
     useEffect(() => {
-        axios.get("http://localhost:3000/authenticate", { withCredentials: true })
+        axios.get(`${API_BASE_URL}/authenticate`, { withCredentials: true })
             .then((res) => {
                 setIsAuthenticated(res.data.authenticated);
             })

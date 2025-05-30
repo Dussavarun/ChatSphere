@@ -5,7 +5,7 @@ import { usechatTypeStore } from '../store/chatTypeStore';
 import socket from '../../backend/sockets/socket';
 
 const GroupsDisplay = () => {
-  const API_BASE_URL = "http://localhost:3000";
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const [groupchatsList, setGroupchatsList] = useState([]);
   const [userEmail, setUserEmail] = useState("");
   const [isLoading, setIsLoading] = useState(true);

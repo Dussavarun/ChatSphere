@@ -9,7 +9,7 @@ import { handleNewMessage } from "../../backend/sockets/socket.handlenewmessage"
 import Messagecontent from "./Messagecontent";
 import { Send, Paperclip, X } from "lucide-react";
 
-const ChatWindow = ({ conversationId, apiBaseUrl = "http://localhost:3000", onError }) => {
+const ChatWindow = ({ conversationId, apiBaseUrl , onError }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   //we set the receiver email while fetching the conversation details

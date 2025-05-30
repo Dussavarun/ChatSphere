@@ -19,7 +19,10 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
   const [error, setError] = useState("");
   const messagesEndRef = useRef(null);
 
-  const API_BASE_URL = "http://localhost:3000";
+  // const API_BASE_URL = "http://localhost:3000";
+
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  
 
   // Fetch current user on component mount
   useEffect(() => {

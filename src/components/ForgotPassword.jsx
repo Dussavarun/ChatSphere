@@ -2,7 +2,8 @@ import axios from 'axios';
 import React, { useState } from 'react'
 
 const ForgotPassword = () => {
-
+  
+ const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
  const [email , setEmail] = useState('');
 
  const handleformchange = (e) =>{
@@ -14,7 +15,7 @@ const ForgotPassword = () => {
     console.log("sending mail to " ,email);
 
     try {
-        const response = await axios.post("http://localhost:3000/emailService/forgot-email-pass", { email} );
+        const response = await axios.post(`${API_BASE_URL}/emailService/forgot-email-pass`, { email} );
         if (response.status === 200) {
           alert("link to reset password has been sent");
         }
