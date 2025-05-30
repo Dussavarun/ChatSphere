@@ -1,7 +1,8 @@
 import groupMessage from "../models/groupMessage.js";
 import groupchatmodel from "../models/groupchatmodel.js";
 import mongoose from "mongoose";
-export const fetchgroupmessages = async (req, res) => {
+
+const fetchgroupmessages = async (req, res) => {
   try {
     console.log("Received groupchatId:", req.params.groupchatId);
     if (!mongoose.Types.ObjectId.isValid(req.params.groupchatId)) {
@@ -27,3 +28,6 @@ export const fetchgroupmessages = async (req, res) => {
     res.status(500).json({ error: "Could not fetch messages", details: err.message });
   }
 };
+
+
+export default fetchgroupmessages;

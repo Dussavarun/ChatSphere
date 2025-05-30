@@ -1,6 +1,6 @@
 import groupChatModel from "../models/groupchatmodel.js";
 
-export const createGroupController = async (req, res) => {
+const createGroupController = async (req, res) => {
   try {
     const { groupchatName, members , createdBy} = req.body;
 
@@ -22,3 +22,6 @@ export const createGroupController = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+export default createGroupController;

@@ -26,7 +26,7 @@ const upload = multer({
 });
 
 // Main middleware
-export const groupfilesharecontroller = [
+const groupfilesharecontroller = [
   upload.single("file"),
   async (req, res) => {
     try {
@@ -81,3 +81,5 @@ export const groupfilesharecontroller = [
     }
   },
 ];
+
+export default groupfilesharecontroller;
