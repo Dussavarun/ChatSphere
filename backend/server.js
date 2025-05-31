@@ -47,8 +47,8 @@ app.get('*', (req, res) => {
 // Connect to MongoDB
 //local mongo url = "mongodb://localhost:27017/chatapp";
 mongoose.connect(process.env.MONGO_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true,
 }).then(() => {
     console.log("Connected to MongoDB from server.js");
 }).catch(err => {
