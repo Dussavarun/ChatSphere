@@ -38,8 +38,8 @@ const PORT = 3000;
 
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
-        ? ["https://chatsphere-s3hd.onrender.com"]  
-        : "http://localhost:5173",
+        ?  ["https://chataa.netlify.app"]  
+        : ["http://localhost:5173"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
