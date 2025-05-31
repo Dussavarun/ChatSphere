@@ -18,9 +18,10 @@ import emailServicerouter from "./utils/forgotpass.emailService.js";
 dotenv.config();
 
 // Connect to MongoDB
-mongoose.connect("mongodb://localhost:27017/chatapp", {
-    // useNewUrlParser: true,
-    // useUnifiedTopology: true,
+//local mongo url = "mongodb://localhost:27017/chatapp";
+mongoose.connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
 }).then(() => {
     console.log("Connected to MongoDB from server.js");
 }).catch(err => {
