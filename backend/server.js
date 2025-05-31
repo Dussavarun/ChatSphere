@@ -14,8 +14,35 @@ import groupRoutes from "./routes/groupRoutes.js"
 import authRoutes from "./routes/auth.js";
 import messageRoutes from "./routes/messageRoute.js";
 import emailServicerouter from "./utils/forgotpass.emailService.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
+app.use(express.static(path.join(__dirname, 'dist')));
+
+app.get('*', (req, res) => {
+    if (req.path.startsWith('/message') || 
+        req.path.startsWith('/group') || 
+        req.path.startsWith('/emailService') || 
+        req.path.startsWith('/user') || 
+        req.path.startsWith('/login') || 
+        req.path.startsWith('/register') ||
+        req.path.startsWith('/current-user') ||
+        req.path.startsWith('/chat') ||
+        req.path.startsWith('/logout') ||
+        req.path.startsWith('/forgot-password') ||
+        req.path.startsWith('/reset-password')) {
+        return; 
+    }
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+
 
 // Connect to MongoDB
 //local mongo url = "mongodb://localhost:27017/chatapp";
@@ -32,7 +59,9 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: process.env.NODE_ENV === 'production' 
+        ? [process.env.RENDER_EXTERNAL_URL, "https://chatsphere-s3hd.onrender.com/"]
+        : "http://localhost:5173",
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]
 }));

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Outlet } from 'react-router-dom';
+import { Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
 import Chatui from './components/Chatui';
