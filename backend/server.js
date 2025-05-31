@@ -82,11 +82,6 @@ const verifyUser = async (req, res, next) => {
     }
 };
 
-// Root route
-app.get('/', (req, res) => {
-    res.send("Hello bro, how are you?");
-});
-
 // Get current user route //used in the chatui
 app.get('/current-user', verifyUser, (req, res) => {
     res.json({ email: req.user.email });
