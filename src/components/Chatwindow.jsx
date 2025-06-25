@@ -21,7 +21,7 @@ const ChatWindow = ({ conversationId, apiBaseUrl , onError }) => {
   const messagesEndRef = useRef(null);
   const user = userAuthstore((state)=>state.user)
   const userEmail = user?.email;
-
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -132,7 +132,7 @@ const ChatWindow = ({ conversationId, apiBaseUrl , onError }) => {
 
   const handledeletemessage = async(id) =>{
       try {
-          await axios.delete(`${apiBaseUrl}/message/message-delete/${id}`);
+          await axios.delete(`${API_BASE_URL}/message/message-delete/${id}`);
           console.log('Deleted message id:', id);
           setMessages(prev => prev.filter(m => m.id !== id));
           console.log("message deleting bro wait");
