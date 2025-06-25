@@ -132,7 +132,7 @@ const ChatWindow = ({ conversationId, apiBaseUrl , onError }) => {
 
   const handledeletemessage = async(id) =>{
       try {
-          await axios.delete(`http://localhost:3000/message/message-delete/${id}`);
+          await axios.delete(`${apiBaseUrl}/message/message-delete/${id}`);
           console.log('Deleted message id:', id);
           setMessages(prev => prev.filter(m => m.id !== id));
           console.log("message deleting bro wait");
