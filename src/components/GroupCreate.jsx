@@ -16,7 +16,7 @@ const GroupCreate = ({onClose} ) => {
 
   const [selectedUsers , setselectedUsers] = useState([]);
   const user = userAuthstore((state) => state.user);
-  const userEmail = user.email;
+  const userEmail = user?.email;
 
   useEffect(() => {
     if(userEmail){

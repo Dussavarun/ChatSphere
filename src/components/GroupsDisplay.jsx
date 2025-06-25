@@ -10,7 +10,7 @@ const GroupsDisplay = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const user = userAuthstore((state) => state.user);
-  const userEmail = user.email;
+  const userEmail = user?.email;
   const setSelectedGroup = usechatTypeStore((state) => state.setSelectedGroup);
 
 

@@ -20,7 +20,7 @@ const ChatWindow = ({ conversationId, apiBaseUrl , onError }) => {
   const [onlinestatus , setOnlinestatus] = useState({status : null});
   const messagesEndRef = useRef(null);
   const user = userAuthstore((state)=>state.user)
-  const userEmail = user.email;
+  const userEmail = user?.email;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

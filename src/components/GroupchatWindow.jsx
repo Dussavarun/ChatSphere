@@ -15,11 +15,10 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const messagesEndRef = useRef(null);
-  const user = userAuthstore((state)=>state.user)
-  const userEmail = user.email;
-  
+  const user = userAuthstore((state) => state.user);
+  const userEmail = user?.email;
+
   const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
-  
 
   // Fetch group name
   useEffect(() => {
@@ -41,27 +40,34 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
   // Fetch messages for that group
   useEffect(() => {
     const fetchmessages = async () => {
-      try {        
+      try {
         if (!groupchatId) {
           console.error("Invalid groupchatId:", groupchatId);
           return;
         }
-        
-        const res = await axios.get(`${API_BASE_URL}/group/groupmessages/${groupchatId}`);        
-        const formattedMessages = res.data.map(msg => ({
+
+        const res = await axios.get(
+          `${API_BASE_URL}/group/groupmessages/${groupchatId}`
+        );
+        const formattedMessages = res.data.map((msg) => ({
           ...msg,
           senderId: msg.senderId || {
-            email: msg.sender || "unknown", 
-            name: msg.senderName || (msg.sender ? msg.sender.split('@')[0] : "Unknown")
-          }
+            email: msg.sender || "unknown",
+            name:
+              msg.senderName ||
+              (msg.sender ? msg.sender.split("@")[0] : "Unknown"),
+          },
         }));
-        
+
         setMessages(formattedMessages);
       } catch (error) {
-        console.error("Error fetching group messages:", error.response ? error.response.data : error.message);
+        console.error(
+          "Error fetching group messages:",
+          error.response ? error.response.data : error.message
+        );
       }
     };
-    
+
     if (groupchatId) {
       fetchmessages();
     }
@@ -69,7 +75,7 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   // to join specific group when the user clicks on other group to chat
@@ -78,36 +84,35 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
       console.log(`Joining specific group: ${groupchatId}`);
       socket.emit("join-specific-group", {
         groupId: groupchatId,
-        userEmail: userEmail
+        userEmail: userEmail,
       });
     }
   }, [groupchatId, userEmail]);
 
-  
   useEffect(() => {
     const handleIncomingMessage = (data) => {
       console.log("Received group message:", data);
-      
+
       if (data.groupId && data.groupId !== groupchatId) {
         console.log("Message not for current group, ignoring");
         return;
       }
-      
+
       // to ensure the message is only sent to others and not echoing back
       if (data.sender !== userEmail) {
-        setMessages(prevMessages => [
+        setMessages((prevMessages) => [
           ...prevMessages,
           {
             id: Date.now(),
             text: data.message || "",
             senderId: {
               email: data.sender,
-              name: data.senderName || data.sender.split('@')[0] || data.sender
+              name: data.senderName || data.sender.split("@")[0] || data.sender,
             },
-            fileUrl: data.fileUrl || null, 
+            fileUrl: data.fileUrl || null,
             fileName: data.fileName || null,
-            createdAt: data.timestamp || new Date().toISOString()
-          }
+            createdAt: data.timestamp || new Date().toISOString(),
+          },
         ]);
       }
     };
@@ -115,12 +120,15 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
     // to handle errors
     const handleSocketError = (errorMessage) => {
       console.error("Socket error:", errorMessage);
-      setError(errorMessage , `please refresh the page and start you conversation`);
+      setError(
+        errorMessage,
+        `please refresh the page and start you conversation`
+      );
     };
 
-    socket.on('group-recieved-message', handleIncomingMessage);
-    socket.on('error', handleSocketError);
-    
+    socket.on("group-recieved-message", handleIncomingMessage);
+    socket.on("error", handleSocketError);
+
     return () => {
       socket.off("group-recieved-message", handleIncomingMessage);
       socket.off("error", handleSocketError);
@@ -135,13 +143,13 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
 
     if (file) {
       groupfilesharing({
-        file, 
+        file,
         groupName,
-        input: input.trim() || "", 
-        userEmail, 
-        setFile, 
-        setMessages, 
-        API_BASE_URL
+        input: input.trim() || "",
+        userEmail,
+        setFile,
+        setMessages,
+        API_BASE_URL,
       });
       setInput("");
     } else {
@@ -149,31 +157,31 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
         groupName,
         sender: userEmail,
         message: input.trim(),
-        groupId: groupchatId 
+        groupId: groupchatId,
       });
-      
+
       // adding message directly to local state for better ux
-      setMessages(prevMessages => [
+      setMessages((prevMessages) => [
         ...prevMessages,
         {
           id: Date.now(),
           text: input.trim(),
           senderId: {
             email: userEmail,
-            name: "Me"
+            name: "Me",
           },
-          createdAt: new Date().toISOString()
-        }
+          createdAt: new Date().toISOString(),
+        },
       ]);
       setInput("");
     }
   };
 
-  const handlemessagedelete = async(id) => {
+  const handlemessagedelete = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/message/message-delete/${id}`);
-      console.log('Deleted message id:', id);
-      setMessages(prev => prev.filter(m => m._id !== id));
+      console.log("Deleted message id:", id);
+      setMessages((prev) => prev.filter((m) => m._id !== id));
     } catch (err) {
       console.error("Failed to delete message:", err);
     }
@@ -190,7 +198,7 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
     setFile(file);
   };
 
-  // Check if the message is from current user // just for ui thing 
+  // Check if the message is from current user // just for ui thing
   const isCurrentUserMessage = (message) => {
     return message.senderId?.email === userEmail;
   };
@@ -218,7 +226,7 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
       {error && (
         <div className="mx-4 mt-2 p-3 bg-gradient-to-r from-red-900/80 to-red-800/80 border border-red-600/50 text-red-100 rounded-lg flex justify-between items-center backdrop-blur-sm">
           <span className="text-sm">{error}</span>
-          <button 
+          <button
             onClick={() => setError("")}
             className="text-red-200 hover:text-white font-bold text-lg px-2"
           >
@@ -228,7 +236,10 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <Users className="w-16 h-16 text-gray-500 mb-4" />
@@ -241,13 +252,13 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
             return (
               <div
                 key={msg._id || `msg-${index}`}
-                className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${isMe ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg px-4 py-3 rounded-2xl ${
-                    isMe 
-                      ? 'bg-gradient-to-r from-white to-gray-200 text-gray-800 shadow-lg' 
-                      : 'bg-gradient-to-r from-gray-700/80 to-gray-600/80 text-white shadow-lg backdrop-blur-sm'
+                    isMe
+                      ? "bg-gradient-to-r from-white to-gray-200 text-gray-800 shadow-lg"
+                      : "bg-gradient-to-r from-gray-700/80 to-gray-600/80 text-white shadow-lg backdrop-blur-sm"
                   }`}
                 >
                   {!isMe && (
@@ -256,9 +267,9 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
                     </div>
                   )}
 
-                  <Messagecontent 
-                    key={msg._id || `content-${index}`} 
-                    msg={msg} 
+                  <Messagecontent
+                    key={msg._id || `content-${index}`}
+                    msg={msg}
                     onDelete={() => handlemessagedelete(msg._id)}
                   />
                 </div>
@@ -274,7 +285,9 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
         <div className="px-4 py-2 bg-black/20 backdrop-blur-sm border-t border-gray-700/50">
           <div className="flex items-center bg-gray-700/50 p-3 rounded-xl">
             <Paperclip className="w-4 h-4 text-gray-300 mr-2" />
-            <span className="text-sm text-gray-200 flex-1 truncate">{file.name}</span>
+            <span className="text-sm text-gray-200 flex-1 truncate">
+              {file.name}
+            </span>
             <button
               type="button"
               onClick={() => setFile(null)}
@@ -292,25 +305,25 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
           {/* File attachment button */}
           <label className="flex items-center justify-center w-10 h-10 bg-gray-700/50 hover:bg-gray-600/50 rounded-full cursor-pointer transition-all duration-200 hover:scale-105">
             <Paperclip className="w-5 h-5 text-gray-300" />
-            <input 
+            <input
               type="file"
               onChange={(e) => handleFileChange(e.target.files[0])}
               disabled={isLoading}
               className="hidden"
             />
           </label>
-          
+
           {/* Message input */}
           <input
             type="text"
             className="flex-1 px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200 backdrop-blur-sm"
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type a message..."
             disabled={!groupName || isLoading}
           />
-          
+
           {/* Send button */}
           <button
             onClick={sendMessage}

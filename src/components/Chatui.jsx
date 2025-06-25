@@ -21,7 +21,7 @@ const Chatui = () => {
 
   const { initSocket, isConnected } = userSocketstore();
   const user = userAuthstore((state) => state.user);
-  const userEmail = user.email;
+  const userEmail = user?.email;
   const logout = userAuthstore((state) => state.logout);
   const disconnectSocket = userSocketstore((state) => state.disconnectSocket);
   const navigate = useNavigate();
