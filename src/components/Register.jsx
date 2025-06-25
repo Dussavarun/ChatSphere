@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import axios from "axios";
 import { Link, useNavigate } from 'react-router-dom';
+import { userAuthstore } from '../../backend/store/userauthstore';
 
 const Register = () => {
   const navigate = useNavigate();
   const [formdata, setFormdata] = useState({
     fullname: '', email: '', password: '', confirmPassword: '', mobilenumber: ''
   });
+  const login = userAuthstore((state)=>state.login);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
   const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
   const handleformdataChange = (e) => {
     const { name, value } = e.target;
     setFormdata((prevdata) => ({ ...prevdata, [name]: value }));
@@ -26,10 +30,15 @@ const Register = () => {
     const dataToSend = { ...formdata };
     delete dataToSend.confirmPassword;
     
-    axios.post(`${API_BASE_URL}/register`, dataToSend, {
+    const res = axios.post(`${API_BASE_URL}/register`, dataToSend, {
       headers: { "Content-Type": "application/json" }, withCredentials: true
     })
-    .then(() => navigate('/chat'))
+    .then((res) => {
+      const {user , token } = res.data;
+      localStorage.setItem("token", token);
+      login(user);
+      navigate('/login')
+    })
     .catch((error) => setError(error.response?.data || 'Registration failed. Please try again.'))
     .finally(() => setIsLoading(false));
   };

@@ -1,26 +1,27 @@
 import React, { useState, useEffect, useRef } from "react";
-import socket from "../../backend/sockets/socket";
+import socket from "../../backend/sockets/clientsocket";
 import axios from "axios";
-import { fetchCurrentUser } from "../utils/FetchCurrentuser";
 import { fetchConversationDetails } from "../utils/FetchConversationDetails";
 import { fetchMessages } from "../utils/Fetchmessages";
 import sendMessage from "../utils/Sending.message";
 import { handleNewMessage } from "../../backend/sockets/socket.handlenewmessage";
 import Messagecontent from "./Messagecontent";
 import { Send, Paperclip, X } from "lucide-react";
+import { userAuthstore } from "../../backend/store/userauthstore";
 
 const ChatWindow = ({ conversationId, apiBaseUrl , onError }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   //we set the receiver email while fetching the conversation details
   const [receiverEmail, setReceiverEmail] = useState("");
-  const [userEmail, setUserEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [file, setFile] = useState(null); // Store actual file object, not just value
   const [onlinestatus , setOnlinestatus] = useState({status : null});
   const messagesEndRef = useRef(null);
-  
+  const user = userAuthstore((state)=>state.user)
+  const userEmail = user.email;
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -37,11 +38,6 @@ const ChatWindow = ({ conversationId, apiBaseUrl , onError }) => {
     return date.toLocaleDateString();
   };
 
-  // to get the  current user on mount
-  useEffect(() => {
-    fetchCurrentUser(setIsLoading , setUserEmail , onError);
-  }, [apiBaseUrl,setUserEmail, onError]);
-
    
   if(conversationId)
   // Get conversation details // used to fetch the whole data of a conversation room based on convo romm id
@@ -54,7 +50,6 @@ const ChatWindow = ({ conversationId, apiBaseUrl , onError }) => {
   // Fetch messages for this conversation // this is used 
   useEffect(() => {
     let isMounted = true;
-
     if (conversationId) {
       fetchMessages(apiBaseUrl , conversationId , setMessages , onError , isMounted , setIsLoading);
     }

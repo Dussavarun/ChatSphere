@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { X } from "lucide-react";
-import { fetchCurrentUser } from '../utils/FetchCurrentuser.js';
 import axios from 'axios';
 import { fetchConversations } from '../utils/Fetchfreindslist.js';
-// import { fetchConversations } from '../../backend/controllers/fetchfreindslist';
+import { userAuthstore } from '../../backend/store/userauthstore.js';
 
 const GroupCreate = ({onClose} ) => {
 
@@ -11,16 +10,13 @@ const GroupCreate = ({onClose} ) => {
   const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
   
   const [groupName, setGroupName] = useState("");
-  const [userEmail , setuserEmail] = useState("");
   const [IsLoading, setIsLoading] = useState();
   const [error, setError] = useState(null);
   const [conversations, setConversations] = useState([]);
 
   const [selectedUsers , setselectedUsers] = useState([]);
-
-  useEffect(()=>{
-    fetchCurrentUser(setIsLoading , setuserEmail, error);
-  },[API_BASE_URL]);
+  const user = userAuthstore((state) => state.user);
+  const userEmail = user.email;
 
   useEffect(() => {
     if(userEmail){

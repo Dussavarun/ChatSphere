@@ -21,10 +21,19 @@ router.post('/login', async (req, res) => {
                 let token = jwt.sign({ email: user.email }, "secretKey");
                 res.cookie("token", token, { httpOnly: true, secure: false });
                 // Also send the token in the response so it can be stored in localStorage
+                // return res.send({
+                //     message: "Logged in successfully",
+                //     user: { email: user.email },
+                //     token: token
+                // });
                 return res.send({
                     message: "Logged in successfully",
-                    user: { email: user.email },
-                    token: token
+                    user: {
+                        id: user._id,
+                        email: user.email,
+                        name: user.name,
+                    },
+                    token,
                 });
             } else {
                 return res.status(401).send("Incorrect password");

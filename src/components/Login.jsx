@@ -1,15 +1,18 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import socket from '../../backend/sockets/socket';
+import { userAuthstore } from '../../backend/store/userauthstore';
+import { userSocketstore } from '../../backend/store/userSocketstore';
 
 const Login = () => {
   const navigate = useNavigate();
   const [logformdata, setlogformdata] = useState({ email: '', password: '' });
+  const login = userAuthstore((state) => state.login);
+  const initSocket = userSocketstore((state) => state.initSocket);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
   const handleformchange = (e) => {
     const {name, value} = e.target;
@@ -29,9 +32,12 @@ const Login = () => {
         if (response.data.token) {
           localStorage.setItem("token", response.data.token);
         }
-        socket.connect();
-        socket.emit("user-login", logformdata.email);
-        navigate('/chat');
+        const {user} = response.data;
+        login(user);
+        setTimeout(() => {
+          initSocket();
+          navigate('/chat');
+        }, 50);
       }
     })
     .catch((error) => setError(error.response?.data || 'Login failed. Please try again.'))

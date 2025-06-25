@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-
+// since fronted should connect to backend you are using serveer url 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
 const socket = io(BACKEND_URL, {
@@ -11,6 +11,4 @@ const socket = io(BACKEND_URL, {
   withCredentials: true
 });
 
-
-  
 export default socket;

@@ -1,13 +1,11 @@
-
-
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import React from "react";
-import { fetchCurrentUser } from "../utils/FetchCurrentuser";
-import socket from "../../backend/sockets/socket";
+import socket from "../../backend/sockets/clientsocket";
 import { groupfilesharing } from "../../backend/utils/group.filesharing.multer";
 import Messagecontent from "./Messagecontent";
 import { Send, Paperclip, X, Users } from "lucide-react";
+import { userAuthstore } from "../../backend/store/userauthstore";
 
 const GroupchatWindow = ({ groupchatId, onError }) => {
   const [groupName, setGroupName] = useState("");
@@ -15,29 +13,13 @@ const GroupchatWindow = ({ groupchatId, onError }) => {
   const [file, setFile] = useState(null);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
   const [error, setError] = useState("");
   const messagesEndRef = useRef(null);
-
-  // const API_BASE_URL = "http://localhost:3000";
-
+  const user = userAuthstore((state)=>state.user)
+  const userEmail = user.email;
+  
   const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
   
-
-  // Fetch current user on component mount
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      try {
-        await fetchCurrentUser(setIsLoading, setUserEmail, setError);
-      } catch (err) {
-        console.error("Error fetching current user:", err);
-        setError("Failed to authenticate user");
-        setIsLoading(false);
-      }
-    };
-    
-    getCurrentUser();
-  }, []);
 
   // Fetch group name
   useEffect(() => {
