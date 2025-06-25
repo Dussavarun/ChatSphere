@@ -8,13 +8,9 @@ dotenv.config();
 
 const emailServicerouter = express.Router();
 
-const EMAIL_USER="varundussa@gmail.com"
-const EMAIL_PASS="ydfxwqdjgkmzgzch"
-const JWT_SECRET="yourSuperSecretResetKey"
-
-// const EMAIL_USER = process.env.EMAIL_USER;
-// const EMAIL_PASS = process.env.EMAIL_PASS;
-// const JWT_SECRET = process.env.JWT_SECRET;
+const EMAIL_USER = import.meta.env.EMAIL_USER;
+const EMAIL_PASS = import.meta.env.EMAIL_USER;
+const JWT_SECRET = import.meta.env.EMAIL_USER;
 
 
 emailServicerouter.post('/forgot-email-pass', async (req, res) => {
