@@ -1,63 +1,53 @@
-import axios from "axios";
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { userAuthstore } from "../../backend/store/userauthstore";
-import { userSocketstore } from "../../backend/store/userSocketstore";
-import { useLoaderstate } from "../../backend/store/loaderstore";
-import Loader from "./Loader";
+import axios from 'axios';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { userAuthstore } from '../../backend/store/userauthstore';
+import { userSocketstore } from '../../backend/store/userSocketstore';
+import Loader from './Loader';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [logformdata, setlogformdata] = useState({ email: "", password: "" });
+  const [logformdata, setlogformdata] = useState({ email: '', password: '' });
   const login = userAuthstore((state) => state.login);
   const initSocket = userSocketstore((state) => state.initSocket);
-  const [error, setError] = useState("");
-  // const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { showLoader, isLoading, setShowLoader, setIsLoading } =
-    useLoaderstate();
-
-  const API_BASE_URL =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
   const handleformchange = (e) => {
-    const { name, value } = e.target;
+    const {name, value} = e.target;
     setlogformdata((prevdata) => ({ ...prevdata, [name]: value }));
   };
 
   const hanldeloginformsubmit = (e) => {
     e.preventDefault();
-    setError("");
+    setError('');
     setIsLoading(true);
-
-    axios
-      .post(`${API_BASE_URL}/login`, logformdata, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          if (response.data.token) {
-            localStorage.setItem("token", response.data.token);
-          }
-          const { user } = response.data;
-          login(user);
-          setShowLoader(true);
-          setTimeout(() => {
-            initSocket();
-            navigate("/chat");
-          }, 300);
+    
+    axios.post(`${API_BASE_URL}/login`, logformdata, {
+      headers: { "Content-Type": "application/json" }, withCredentials: true
+    })
+    .then((response) => {
+      if (response.status === 200) {
+        if (response.data.token) {
+          localStorage.setItem("token", response.data.token);
         }
-      })
-      .catch((error) =>
-        setError(error.response?.data || "Login failed. Please try again.")
-      )
-      .finally(() => setIsLoading(false));
+        const {user} = response.data;
+        login(user);
+        setTimeout(() => {
+          initSocket();
+          navigate('/chat');
+        }, 300);
+      }
+    })
+    .catch((error) => setError(error.response?.data || 'Login failed. Please try again.'))
+    .finally(() => setIsLoading(false));
   };
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-6">
-      {showLoader && <Loader/>}
+      {isLoading && <Loader/>}
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-light text-white mb-2">ChatSphere</h1>
@@ -69,60 +59,31 @@ const Login = () => {
             {error}
           </div>
         )}
-
+        
         <form onSubmit={hanldeloginformsubmit} className="space-y-4">
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={logformdata.email}
-            onChange={handleformchange}
-            required
-            className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none"
-          />
-
+          <input type="email" name="email" placeholder="Email" value={logformdata.email} onChange={handleformchange} required 
+            className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none" />
+          
           <div>
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={logformdata.password}
-              onChange={handleformchange}
-              required
-              className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none"
-            />
-            <Link
-              to="/forgot-password"
-              className="block text-right text-sm text-gray-400 hover:text-gray-300 mt-2"
-            >
+            <input type="password" name="password" placeholder="Password" value={logformdata.password} onChange={handleformchange} required 
+              className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none" />
+            <Link to="/forgot-password" className="block text-right text-sm text-gray-400 hover:text-gray-300 mt-2">
               Forgot password?
             </Link>
           </div>
-
+          
           <div className="flex items-center space-x-3 mt-6">
-            <input
-              id="remember"
-              type="checkbox"
-              className="h-4 w-4 rounded border-gray-600 bg-gray-900 text-blue-500 focus:ring-blue-500"
-            />
-            <label htmlFor="remember" className="text-sm text-gray-400">
-              Remember me
-            </label>
+            <input id="remember" type="checkbox" className="h-4 w-4 rounded border-gray-600 bg-gray-900 text-blue-500 focus:ring-blue-500" />
+            <label htmlFor="remember" className="text-sm text-gray-400">Remember me</label>
           </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full mt-6 py-4 bg-white text-black font-medium rounded-lg hover:bg-gray-100 disabled:opacity-50 transition-colors"
-          >
-            {isLoading ? "Signing in..." : "Sign in"}
+          
+          <button type="submit" disabled={isLoading} 
+            className="w-full mt-6 py-4 bg-white text-black font-medium rounded-lg hover:bg-gray-100 disabled:opacity-50 transition-colors">
+            {isLoading ? 'Signing in...' : 'Sign in'}
           </button>
-
+          
           <p className="text-center text-gray-400 mt-6">
-            Don't have an account?{" "}
-            <Link to="/register" className="text-white hover:text-gray-300">
-              Sign up
-            </Link>
+            Don't have an account? <Link to="/register" className="text-white hover:text-gray-300">Sign up</Link>
           </p>
         </form>
       </div>
