@@ -162,17 +162,14 @@ export const chatapp = (server) => {
       try {
         const email = await redisClient.get(`socket:${socket.id}`);
         if (email) {
-          await redisClient.del(`user:${email}`);
-          await redisClient.del(`socket:${socket.id}`);
-          await redisClient.del(`user_groups:${email}`);
-
           socket.broadcast.emit("user-status-change", {
             email,
             status: false,
             lastSeen: Date.now(),
           });
-
-          console.log(`User disconnected: ${email}`);
+          await redisClient.del(`user:${email}`);
+          await redisClient.del(`socket:${socket.id}`);
+          await redisClient.del(`user_groups:${email}`);
         }
       } catch (err) {
         console.error("Error in disconnect handler:", err);
