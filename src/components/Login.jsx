@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { userAuthstore } from '../../backend/store/userauthstore';
 import { userSocketstore } from '../../backend/store/userSocketstore';
-import Loader from './Loader';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -38,7 +37,7 @@ const Login = () => {
         setTimeout(() => {
           initSocket();
           navigate('/chat');
-        }, 300);
+        }, 50);
       }
     })
     .catch((error) => setError(error.response?.data || 'Login failed. Please try again.'))
@@ -47,7 +46,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-6">
-      {isLoading && <Loader/>}
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-light text-white mb-2">ChatSphere</h1>
