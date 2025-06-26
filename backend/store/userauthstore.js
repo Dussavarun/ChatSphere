@@ -6,6 +6,13 @@ export const userAuthstore = create(
         (set)=>({
             user : null,
             isLoggedin : false,
+            pgp : {
+                publickey : null ,
+                privatekey : null
+            },
+
+            setpgpkeys : (keys) => {pgp : keys},
+            
             login : (userData) => set({
                 user : userData,
                 isLoggedin : true,

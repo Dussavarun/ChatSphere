@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import axios from "axios";
-import { Link, useNavigate } from 'react-router-dom';
-import { userAuthstore } from '../../backend/store/userauthstore';
+import { Link, useNavigate } from "react-router-dom";
+import { userAuthstore } from "../../backend/store/userauthstore";
+import { generateKeypair, saveKeysToStorage } from "../crypto/keymanager";
 
 const Register = () => {
   const navigate = useNavigate();
   const [formdata, setFormdata] = useState({
-    fullname: '', email: '', password: '', confirmPassword: '', mobilenumber: ''
+    fullname: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    mobilenumber: "",
   });
-  const login = userAuthstore((state)=>state.login);
-  const [error, setError] = useState('');
+  const login = userAuthstore((state) => state.login);
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
@@ -19,9 +24,9 @@ const Register = () => {
     setFormdata((prevdata) => ({ ...prevdata, [name]: value }));
   };
 
-  const handleFormsubmit = (e) => {
+  const handleFormsubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     if (formdata.password !== formdata.confirmPassword) {
       setError("Passwords don't match");
       return;
@@ -29,18 +34,33 @@ const Register = () => {
     setIsLoading(true);
     const dataToSend = { ...formdata };
     delete dataToSend.confirmPassword;
-    
-    const res = axios.post(`${API_BASE_URL}/register`, dataToSend, {
-      headers: { "Content-Type": "application/json" }, withCredentials: true
-    })
-    .then((res) => {
-      const {user , token } = res.data;
-      localStorage.setItem("token", token);
-      login(user);
-      navigate('/login')
-    })
-    .catch((error) => setError(error.response?.data || 'Registration failed. Please try again.'))
-    .finally(() => setIsLoading(false));
+
+    try {
+      const res = axios.post(`${API_BASE_URL}/register`, dataToSend, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      });
+
+      if (res.status === 200) {
+        const passphrase = import.meta.env.VITE_PGP_PASSPHRASE;
+        const {privatekey , publickey} = await generateKeypair(dataToSend.email , passphrase);
+        saveKeysToStorage({publickey , privatekey});
+        await axios.post(`${API_BASE_URL}/set-public-key` , {
+          publickey
+        })
+        const { user, token } = res.data;
+        localStorage.setItem("token", token);
+        login(user);
+        navigate("/login");
+      }
+    } catch {
+      (error) =>
+        setError(
+          error.response?.data || "Registration failed. Please try again."
+        );
+    } finally {
+      () => setIsLoading(false);
+    }
   };
 
   return (
@@ -56,37 +76,90 @@ const Register = () => {
             {error}
           </div>
         )}
-        
+
         <form onSubmit={handleFormsubmit} className="space-y-4">
-          <input type="text" name="fullname" placeholder="Full Name" value={formdata.fullname} onChange={handleformdataChange} required 
-            className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none" />
-          
-          <input type="email" name="email" placeholder="Email" value={formdata.email} onChange={handleformdataChange} required 
-            className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none" />
-          
-          <input type="password" name="password" placeholder="Password" value={formdata.password} onChange={handleformdataChange} required 
-            className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none" />
-          
-          <input type="password" name="confirmPassword" placeholder="Confirm Password" value={formdata.confirmPassword} onChange={handleformdataChange} required 
-            className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none" />
-          
-          <input type="tel" name="mobilenumber" placeholder="Mobile Number" value={formdata.mobilenumber} onChange={handleformdataChange} required 
-            className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none" />
-          
+          <input
+            type="text"
+            name="fullname"
+            placeholder="Full Name"
+            value={formdata.fullname}
+            onChange={handleformdataChange}
+            required
+            className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none"
+          />
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formdata.email}
+            onChange={handleformdataChange}
+            required
+            className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none"
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formdata.password}
+            onChange={handleformdataChange}
+            required
+            className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none"
+          />
+
+          <input
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            value={formdata.confirmPassword}
+            onChange={handleformdataChange}
+            required
+            className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none"
+          />
+
+          <input
+            type="tel"
+            name="mobilenumber"
+            placeholder="Mobile Number"
+            value={formdata.mobilenumber}
+            onChange={handleformdataChange}
+            required
+            className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none"
+          />
+
           <div className="flex items-start space-x-3 mt-6">
-            <input id="terms" type="checkbox" required className="mt-1 h-4 w-4 rounded border-gray-600 bg-gray-900 text-blue-500 focus:ring-blue-500" />
+            <input
+              id="terms"
+              type="checkbox"
+              required
+              className="mt-1 h-4 w-4 rounded border-gray-600 bg-gray-900 text-blue-500 focus:ring-blue-500"
+            />
             <label htmlFor="terms" className="text-sm text-gray-400">
-              I agree to the <a href="#" className="text-blue-400 hover:text-blue-300">Terms</a> and <a href="#" className="text-blue-400 hover:text-blue-300">Privacy Policy</a>
+              I agree to the{" "}
+              <a href="#" className="text-blue-400 hover:text-blue-300">
+                Terms
+              </a>{" "}
+              and{" "}
+              <a href="#" className="text-blue-400 hover:text-blue-300">
+                Privacy Policy
+              </a>
             </label>
           </div>
-          
-          <button type="submit" disabled={isLoading} 
-            className="w-full mt-6 py-4 bg-white text-black font-medium rounded-lg hover:bg-gray-100 disabled:opacity-50 transition-colors">
-            {isLoading ? 'Creating Account...' : 'Create Account'}
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full mt-6 py-4 bg-white text-black font-medium rounded-lg hover:bg-gray-100 disabled:opacity-50 transition-colors"
+          >
+            {isLoading ? "Creating Account..." : "Create Account"}
           </button>
-          
+
           <p className="text-center text-gray-400 mt-6">
-            Already have an account? <Link to="/login" className="text-white hover:text-gray-300">Sign in</Link>
+            Already have an account?{" "}
+            <Link to="/login" className="text-white hover:text-gray-300">
+              Sign in
+            </Link>
           </p>
         </form>
       </div>
