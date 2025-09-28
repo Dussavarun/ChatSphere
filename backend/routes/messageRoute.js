@@ -138,30 +138,53 @@ router.get("/:conversationId", async (req, res) => {
 router.delete('/message-delete/:id',messagedelete);
 
 
-// Get a single conversation by ID // used in chat window
 router.get("/conversation/:conversationId", async (req, res) => {
   try {
     const { conversationId } = req.params;
-    
-    // Verify conversationId is valid MongoDB ObjectId
+    const { requester } = req.query;
+
+    // Validate conversation ID
     if (!mongoose.Types.ObjectId.isValid(conversationId)) {
       return res.status(400).json({ error: "Invalid conversation ID" });
     }
-    
+
+    // Fetch conversation with participants
     const conversation = await Conversation.findById(conversationId)
       .populate('participants', 'email')
       .populate('lastMessage');
-    
+
     if (!conversation) {
       return res.status(404).json({ error: "Conversation not found" });
     }
-    
-    res.status(200).json(conversation);
+
+    // Identify the other participant
+    const otherUser = conversation.participants.find(p => p.email !== requester);
+
+    if (!otherUser) {
+      return res.status(400).json({ error: "Could not identify other participant" });
+    }
+
+    // Fetch public key of the other participant
+    const otherUserDoc = await User.findOne({ email: otherUser.email }, 'publickey');
+    const publickey = otherUserDoc?.publickey || null;
+
+    if (!publickey) {
+      return res.status(404).json({ error: "Public key not found" });
+    }
+
+    // Respond with conversation + receiver info
+    res.status(200).json({
+      conversation,
+      receiverEmail: otherUser.email,
+      receiverPublicKey: publickey,
+    });
+
   } catch (error) {
     console.error("Error fetching conversation:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 // Get all conversations for a user
 router.get("/conversations/:userEmail", async (req, res) => {

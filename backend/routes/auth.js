@@ -2,7 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import userModel from "../models/User.js";
-import User from "../models/User.js";
+import { generateKeypair } from "../../src/crypto/keymanager.js";
 
 const router = express.Router();
 
@@ -10,58 +10,36 @@ router.post("/login", async (req, res) => {
   try {
     let user = await userModel.findOne({ email: req.body.email });
     if (!user) {
-      return res.status(400).send("User not found");
+      return res.status(400).json({ message: "User not found" });
     }
 
     bcrypt.compare(req.body.password, user.password, (err, result) => {
       if (err) {
-        return res.status(500).send("Error comparing passwords");
+        return res.status(500).json({ message: "Error comparing passwords" });
       }
 
       if (result) {
         let token = jwt.sign({ email: user.email }, "secretKey");
         res.cookie("token", token, { httpOnly: true, secure: false });
-        // Also send the token in the response so it can be stored in localStorage
-        // return res.send({
-        //     message: "Logged in successfully",
-        //     user: { email: user.email },
-        //     token: token
-        // });
-        return res.send({
+        
+        return res.json({
           message: "Logged in successfully",
           user: {
             id: user._id,
             email: user.email,
-            name: user.name,
+            fullname: user.fullname,
           },
           token,
         });
       } else {
-        return res.status(401).send("Incorrect password");
+        return res.status(401).json({ message: "Incorrect password" });
       }
     });
   } catch (error) {
     console.error("Login error:", error);
     if (!res.headersSent) {
-      res.status(500).send("Internal Server Error");
+      res.status(500).json({ message: "Internal Server Error" });
     }
-  }
-});
-
-router.post("/set-public-key", async (req, res) => {
-  try {
-    const { publickey } = req.body;
-    const updatedUser = await User.findOneAndUpdate(
-      { publickey: publickey },
-      { new: true }
-    );
-     if (!updatedUser) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    res.status(200).json({ message: 'Public key saved successfully' });
-  } catch (error) {
-    console.error('Error saving public key:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -72,19 +50,23 @@ router.post("/register", async (req, res) => {
     // Check if user already exists
     let existingUser = await userModel.findOne({ email });
     if (existingUser) {
-      return res.status(400).send("User already exists");
+      return res.status(400).json({ message: "User already exists" });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    //saving to db storage
+    const passphrase = process.env.VITE_PGP_PASSPHRASE ;
+    const { privateKey, publicKey } = await generateKeypair(email, passphrase);
+
+    // Save user to database with public key
     let registeredUser = await userModel.create({
       fullname,
       email,
       password: hashedPassword,
       mobilenumber,
+      publickey: publicKey
     });
-    // { expiresIn: "1h" }
+
     let token = jwt.sign({ email }, "secretKey");
 
     res.cookie("token", token, {
@@ -93,16 +75,24 @@ router.post("/register", async (req, res) => {
       secure: false,
     });
 
-    // Send token in response body for localStorage
-    return res.send({
+    // Send response with token and keys
+    return res.json({
       success: true,
-      user: registeredUser,
+      message: "Registration successful",
+      user: {
+        id: registeredUser._id,
+        fullname: registeredUser.fullname,
+        email: registeredUser.email,
+        mobilenumber: registeredUser.mobilenumber,
+      },
       token: token,
+      publickey: publicKey,
+      privatekey: privateKey
     });
   } catch (error) {
     console.error("Error during registration:", error);
     if (!res.headersSent) {
-      res.status(500).send("Internal Server Error");
+      res.status(500).json({ message: "Internal Server Error" });
     }
   }
 });

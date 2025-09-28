@@ -12,14 +12,14 @@ const sendMessage = async ({
   onError,
   apiBaseUrl
 }) => {
-  if (message.trim() === "" && !file) return;
+  // if (message.trim() === "" && !file) return;
 
   if (!receiverEmail) {
     onError && onError("Recipient not found. Please try again later.");
     return;
   }
 
-  const messageText = message.trim();
+  const messageText = String(message).trim();
   setMessage("");
 
   const tempId = `temp-${Date.now()}`;

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { userAuthstore } from "../../backend/store/userauthstore";
-import { generateKeypair, saveKeysToStorage } from "../crypto/keymanager";
+import { saveKeysToStorage } from "../crypto/keymanager";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ const Register = () => {
     confirmPassword: "",
     mobilenumber: "",
   });
-  const login = userAuthstore((state) => state.login);
+  const {login, setpgpkeys } = userAuthstore.getState();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,39 +27,49 @@ const Register = () => {
   const handleFormsubmit = async (e) => {
     e.preventDefault();
     setError("");
+
     if (formdata.password !== formdata.confirmPassword) {
       setError("Passwords don't match");
       return;
     }
+
     setIsLoading(true);
     const dataToSend = { ...formdata };
     delete dataToSend.confirmPassword;
 
     try {
-      const res = axios.post(`${API_BASE_URL}/register`, dataToSend, {
+      const res = await axios.post(`${API_BASE_URL}/register`, dataToSend, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
 
-      if (res.status === 200) {
-        const passphrase = import.meta.env.VITE_PGP_PASSPHRASE;
-        const {privatekey , publickey} = await generateKeypair(dataToSend.email , passphrase);
-        saveKeysToStorage({publickey , privatekey});
-        await axios.post(`${API_BASE_URL}/set-public-key` , {
-          publickey
-        })
-        const { user, token } = res.data;
-        localStorage.setItem("token", token);
-        login(user);
-        navigate("/login");
-      }
-    } catch {
-      (error) =>
-        setError(
-          error.response?.data || "Registration failed. Please try again."
-        );
+      const { user, token, publickey, privatekey } = res.data;
+
+      // Save keys to localStorage
+      saveKeysToStorage({ privatekey, publickey });
+
+      // Save token to localStorage
+      localStorage.setItem("token", token);
+
+      // Update auth store
+      login(user);
+
+      setpgpkeys({
+        publickey,
+        privatekey
+      });
+
+      // Navigate to login or dashboard
+      navigate("/login");
+    } catch (error) {
+      console.error("Registration error:", error);
+      setError(
+        error.response?.data?.message ||
+          error.response?.data ||
+          "Registration failed. Please try again."
+      );
     } finally {
-      () => setIsLoading(false);
+      setIsLoading(false);
     }
   };
 

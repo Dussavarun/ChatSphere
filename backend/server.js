@@ -19,8 +19,8 @@ dotenv.config();
 
 
 // Connect to MongoDB
-//local mongo url = "mongodb://localhost:27017/chatapp";
-mongoose.connect(process.env.MONGO_URL, {
+const localmongourl = "mongodb://localhost:27017/chatapp";
+mongoose.connect(localmongourl, {
     // useNewUrlParser: true,
     // useUnifiedTopology: true,
 }).then(() => {
@@ -34,9 +34,9 @@ const PORT = 3000;
 
 
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production' 
-        ?  ["https://chataa.netlify.app"]  
-        : ["http://localhost:5173"],
+    // origin: process.env.NODE_ENV === 'production' 
+    //     ?  ["https://chataa.netlify.app"]  
+    origin : ["http://localhost:5173"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]
 }));

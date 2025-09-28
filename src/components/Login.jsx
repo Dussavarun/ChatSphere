@@ -23,7 +23,7 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-    
+        
     axios.post(`${API_BASE_URL}/login`, logformdata, {
       headers: { "Content-Type": "application/json" }, withCredentials: true
     })
@@ -40,7 +40,21 @@ const Login = () => {
         }, 50);
       }
     })
-    .catch((error) => setError(error.response?.data || 'Login failed. Please try again.'))
+    .catch((error) => {
+      // Fix: Extract the error message properly
+      let errorMessage = 'Login failed. Please try again.';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data) {
+        // If data is a string, use it; otherwise use default message
+        errorMessage = typeof error.response.data === 'string' 
+          ? error.response.data 
+          : 'Login failed. Please try again.';
+      }
+      
+      setError(errorMessage);
+    })
     .finally(() => setIsLoading(false));
   };
 
@@ -57,11 +71,11 @@ const Login = () => {
             {error}
           </div>
         )}
-        
+                
         <form onSubmit={hanldeloginformsubmit} className="space-y-4">
           <input type="email" name="email" placeholder="Email" value={logformdata.email} onChange={handleformchange} required 
             className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none" />
-          
+                    
           <div>
             <input type="password" name="password" placeholder="Password" value={logformdata.password} onChange={handleformchange} required 
               className="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none" />
@@ -69,17 +83,17 @@ const Login = () => {
               Forgot password?
             </Link>
           </div>
-          
+                    
           <div className="flex items-center space-x-3 mt-6">
             <input id="remember" type="checkbox" className="h-4 w-4 rounded border-gray-600 bg-gray-900 text-blue-500 focus:ring-blue-500" />
             <label htmlFor="remember" className="text-sm text-gray-400">Remember me</label>
           </div>
-          
+                    
           <button type="submit" disabled={isLoading} 
             className="w-full mt-6 py-4 bg-white text-black font-medium rounded-lg hover:bg-gray-100 disabled:opacity-50 transition-colors">
             {isLoading ? 'Signing in...' : 'Sign in'}
           </button>
-          
+                    
           <p className="text-center text-gray-400 mt-6">
             Don't have an account? <Link to="/register" className="text-white hover:text-gray-300">Sign up</Link>
           </p>
