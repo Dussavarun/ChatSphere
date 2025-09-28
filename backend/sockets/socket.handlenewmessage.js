@@ -1,34 +1,3 @@
-// import { decryptMessage } from "../../src/crypto/e2ee";
-
-// export const handleNewMessage = async (data, setMessages) => {
-//   const passphrase = import.meta.env.VITE_SECURE_PASSPHRASE;
-//   console.log("Using passphrase:", passphrase);
-//   console.log("Encrypted message received:", data.message);
-
-//   try {
-//     const decryptedmessage = await decryptMessage(data.message, passphrase);
-//     console.log("The decrypted message is:", decryptedmessage);
-    
-//     if (!decryptedmessage || decryptedmessage.trim() === "") {
-//       console.log("Decrypted message is empty.");
-//       return;
-//     }
-
-//     // Push to messages list
-//     const newMessage = {
-//       id: Date.now(),
-//       text: decryptedmessage,
-//       fileUrl: data.fileUrl,
-//       fileName: data.fileName,
-//       senderId: data.senderEmail,
-//       createdAt: new Date().toISOString(),
-//     };
-
-//     setMessages((prev) => [...prev, newMessage]);
-//   } catch (err) {
-//     console.error("Failed to decrypt message:", err);
-//   }
-// };
 export const handleNewMessage = async (data, setMessages) => {
   console.log("Received new message data:", data);
 
