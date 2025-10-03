@@ -19,10 +19,17 @@ dotenv.config();
 
 
 // Connect to MongoDB
-const localmongourl = "mongodb://localhost:27017/chatapp";
-mongoose.connect(localmongourl, {
-    // useNewUrlParser: true,
-    // useUnifiedTopology: true,
+// const localmongourl = "mongodb://localhost:27017/chatapp";
+// mongoose.connect(localmongourl, {
+//     // useNewUrlParser: true,
+//     // useUnifiedTopology: true,
+// }).then(() => {
+//     console.log("Connected to MongoDB from server.js");
+// }).catch(err => {
+//     console.error("MongoDB connection error:", err);
+// });
+
+mongoose.connect("mongodb+srv://varundussa:varun7110@cluster0.irwlieu.mongodb.net/chatapp?retryWrites=true&w=majority", {
 }).then(() => {
     console.log("Connected to MongoDB from server.js");
 }).catch(err => {
