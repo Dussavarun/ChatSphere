@@ -27,7 +27,8 @@ const ChatWindow = ({ conversationId, apiBaseUrl, onError }) => {
   
   const user = userAuthstore((state) => state.user);
   const userEmail = user?.email;
-  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  // const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  const API_BASE_URL = "https://chatsphere-2-7q7m.onrender.com"
   const passphrase = import.meta.env.VITE_SECURE_PASSPHRASE;
 
   const scrollToBottom = () => {

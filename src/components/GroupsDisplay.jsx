@@ -5,7 +5,8 @@ import socket from "../../backend/sockets/clientsocket";
 import { userAuthstore } from "../../backend/store/userauthstore";
 
 const GroupsDisplay = () => {
-  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  // const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  const API_BASE_URL = "https://chatsphere-2-7q7m.onrender.com"
   const [groupchatsList, setGroupchatsList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);

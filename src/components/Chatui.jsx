@@ -27,7 +27,8 @@ const Chatui = () => {
   const navigate = useNavigate();
 
   // const API_BASE_URL = "http://localhost:3000";
-  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  // const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  const API_BASE_URL = "https://chatsphere-2-7q7m.onrender.com"
   const selectedChat = usechatTypeStore((state) => state.selectedChat);
   const selectedGroup = usechatTypeStore((state) => state.selectedGroup);
   const setSelectedChat = usechatTypeStore((state) => state.setSelectedChat);

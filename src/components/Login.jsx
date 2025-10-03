@@ -12,7 +12,8 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+  // const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+  const API_BASE_URL = "https://chatsphere-2-7q7m.onrender.com"
 
   const handleformchange = (e) => {
     const {name, value} = e.target;

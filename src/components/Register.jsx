@@ -17,7 +17,8 @@ const Register = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  // const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  const API_BASE_URL = "https://chatsphere-2-7q7m.onrender.com"
 
   const handleformdataChange = (e) => {
     const { name, value } = e.target;
