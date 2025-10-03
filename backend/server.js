@@ -41,9 +41,9 @@ const PORT = 3000;
 
 
 app.use(cors({
-    // origin: process.env.NODE_ENV === 'production' 
-    //     ?  ["https://chataa.netlify.app"]  
-    origin : ["http://localhost:5173"],
+    origin: process.env.NODE_ENV === 'production' 
+        ? ["https://chatspheree.netlify.app/login"]
+        : ["http://localhost:5173"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
